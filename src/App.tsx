@@ -1,7 +1,10 @@
-import { LinearProgress } from "@material-ui/core";
+import { Badge, Drawer, Grid, LinearProgress } from "@material-ui/core";
+import { AddShoppingCart } from "@material-ui/icons";
 import { useState } from "react";
 import { useQuery } from "react-query";
-
+import { Wrapper, StyledButton } from './App.styles';
+import { Cart } from './components/Cart';
+import { Item } from './components/Item';
 
 export type CartItemType = {
   id: number;
@@ -27,20 +30,17 @@ function App() {
   }
 
   const handleAddToCart = (clickedItem: CartItemType) => {
-    setCartItems((prev) => {
+    setCartItems(prev => {
       const isItemInCart = prev.find(item => item.id === clickedItem.id);
 
       if (isItemInCart) {
-        return prev.map((item) => {
+        return prev.map(item =>
           item.id === clickedItem.id ? { ...item, amount: item.amount + 1 } : item
-        })
+        )
       }
       return [...prev, { ...clickedItem, amount: 1 }];
     })
   }
-
-  if (isLoading) return <LinearProgress />;
-  if (error) return <div>Something went wrong ...</div>
 
   const handleRemoveFromCart = (id: number) => {
     setCartItems((prev) =>
@@ -54,10 +54,32 @@ function App() {
       }, [] as CartItemType[]))
   }
 
+  if (isLoading) return <LinearProgress />;
+  if (error) return <div>Something went wrong ...</div>
+
+
   return (
-    <div className="App">
-      start
-    </div>
+    <Wrapper>
+      <Drawer anchor="right" open={cartOpen} onClose={() => setCartOpen(false)}>
+        <Cart
+          cartItems={cartItems}
+          addToCart={handleAddToCart}
+          removeFromCart={handleRemoveFromCart}
+        />
+      </Drawer>
+      <StyledButton onClick={() => setCartOpen(true)}>
+        <Badge badgeContent={getTotalItems(cartItems)} color="error">
+          <AddShoppingCart />
+        </Badge>
+      </StyledButton>
+      <Grid container spacing={3}>
+        {data?.map(item => (
+          <Grid item key={item.id} xs={12} sm={4}>
+            <Item item={item} handleAddToCart={handleAddToCart} />
+          </Grid>
+        ))}
+      </Grid>
+    </Wrapper>
   );
 }
 
