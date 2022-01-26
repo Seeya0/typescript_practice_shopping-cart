@@ -3,8 +3,8 @@ import { AddShoppingCart } from "@material-ui/icons";
 import { useState } from "react";
 import { useQuery } from "react-query";
 import { Wrapper, StyledButton } from './App.styles';
-import { Cart } from './components/Cart';
-import { Item } from './components/Item';
+import Cart from './Cart/Cart';
+import Item from './Item/Item';
 
 export type CartItemType = {
   id: number;
@@ -25,22 +25,26 @@ function App() {
   const { data, isLoading, error } = useQuery<CartItemType[]>('products', getProducts);
   console.log(data)
 
-  const getTotalItems = (items: CartItemType[]) => {
-    items.reduce((ack: number, item) => ack + item.amount, 0)
-  }
+  const getTotalItems = (items: CartItemType[]) =>
+    items.reduce((ack: number, item) => ack + item.amount, 0);
 
   const handleAddToCart = (clickedItem: CartItemType) => {
     setCartItems(prev => {
+      // 1. Is the item already added in the cart?
       const isItemInCart = prev.find(item => item.id === clickedItem.id);
 
       if (isItemInCart) {
         return prev.map(item =>
-          item.id === clickedItem.id ? { ...item, amount: item.amount + 1 } : item
-        )
+          item.id === clickedItem.id
+            ? { ...item, amount: item.amount + 1 }
+            : item
+        );
       }
+      // First time the item is added
       return [...prev, { ...clickedItem, amount: 1 }];
-    })
-  }
+    });
+  };
+
 
   const handleRemoveFromCart = (id: number) => {
     setCartItems((prev) =>
@@ -68,7 +72,7 @@ function App() {
         />
       </Drawer>
       <StyledButton onClick={() => setCartOpen(true)}>
-        <Badge badgeContent={getTotalItems(cartItems)} color="error">
+        <Badge badgeContent={getTotalItems(cartItems)} color='error'>
           <AddShoppingCart />
         </Badge>
       </StyledButton>
